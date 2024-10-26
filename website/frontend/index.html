@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Therapist Management System</title>
+</head>
+<body>
+    <h1>Therapist Management System</h1>
+
+    <h2>Add New Patient</h2>
+    <input type="text" id="patientName" placeholder="Patient Name">
+    <input type="date" id="patientDOB" placeholder="Date of Birth">
+    <input type="text" id="patientContact" placeholder="Contact Info">
+    <button onclick="addPatient()">Add Patient</button>
+
+    <h2>Record Session</h2>
+    <input type="text" id="sessionPatientId" placeholder="Patient ID">
+    <input type="date" id="sessionDate" placeholder="Session Date">
+    <textarea id="sessionNotes" placeholder="Notes"></textarea>
+    <button onclick="addSession()">Add Session</button>
+
+    <h2>Patients</h2>
+    <div id="patientsList"></div>
+
+    <h2>Sessions for Patient</h2>
+    <input type="text" id="searchPatientId" placeholder="Enter Patient ID">
+    <button onclick="fetchSessions()">Fetch Sessions</button>
+    <div id="sessionsList"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
