@@ -1,0 +1,78 @@
+/* frontend/styles.css */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f4f4f4;
+}
+
+h1, h2 {
+    color: #333;
+    text-align: center; /* Center-align headings */
+}
+
+/* Make inputs and buttons responsive */
+.container {
+    max-width: 600px; /* Set a max-width for the container */
+    margin: 0 auto; /* Center the container */
+    padding: 20px;
+}
+
+input, textarea {
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 100%; /* Full width */
+    box-sizing: border-box; /* Ensure padding is included in width */
+}
+
+/* Style for buttons */
+button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%; /* Full width for button */
+}
+
+button:hover {
+    background-color: #218838; /* Darker green on hover */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    body {
+        padding: 10px; /* Reduce padding on smaller screens */
+    }
+
+    h1 {
+        font-size: 24px; /* Adjust heading size */
+    }
+
+    h2 {
+        font-size: 20px; /* Adjust heading size */
+    }
+
+    /* Make the input fields stack on smaller screens */
+    input, textarea, button {
+        width: 100%; /* Full width */
+    }
+}
+
+/* Additional styling for mobile responsiveness */
+@media (max-width: 480px) {
+    h1 {
+        font-size: 20px; /* Smaller heading size */
+    }
+
+    h2 {
+        font-size: 18px; /* Smaller heading size */
+    }
+
+    button {
+        padding: 10px; /* Adjust button padding */
+    }
+}

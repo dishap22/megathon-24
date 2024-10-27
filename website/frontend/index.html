@@ -4,30 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Therapist Management System</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Therapist Management System</h1>
+    <div class="container">
+        <h1>Therapist Management System</h1>
+    
+        <h2>Add New Patient</h2>
+        <input type="text" id="patientName" placeholder="Patient Name">
+        <input type="date" id="patientDOB" placeholder="Date of Birth">
+        <input type="text" id="patientContact" placeholder="Contact Info">
+        <button onclick="addPatient()">Add Patient</button>
+    
+        <h2>Record Session</h2>
+        <input type="text" id="sessionPatientId" placeholder="Patient ID">
+        <input type="date" id="sessionDate" placeholder="Session Date">
+        <textarea id="sessionNotes" placeholder="Notes"></textarea>
+        <input type="file" id="audioFile" accept="audio/*"> <!-- File input for audio -->
+        <button onclick="addSession()">Add Session</button>
 
-    <h2>Add New Patient</h2>
-    <input type="text" id="patientName" placeholder="Patient Name">
-    <input type="date" id="patientDOB" placeholder="Date of Birth">
-    <input type="text" id="patientContact" placeholder="Contact Info">
-    <button onclick="addPatient()">Add Patient</button>
-
-    <h2>Record Session</h2>
-    <input type="text" id="sessionPatientId" placeholder="Patient ID">
-    <input type="date" id="sessionDate" placeholder="Session Date">
-    <textarea id="sessionNotes" placeholder="Notes"></textarea>
-    <button onclick="addSession()">Add Session</button>
-
-    <h2>Patients</h2>
-    <div id="patientsList"></div>
-
-    <h2>Sessions for Patient</h2>
-    <input type="text" id="searchPatientId" placeholder="Enter Patient ID">
-    <button onclick="fetchSessions()">Fetch Sessions</button>
-    <div id="sessionsList"></div>
-
-    <script src="script.js"></script>
+    
+        <h2>Search Patient by Name</h2>
+        <input type="text" id="searchPatientName" placeholder="Enter Patient Name">
+        <button onclick="fetchPatientsByName()">Search by Name</button>
+        <button onclick="fetchPatients()">Print All Patients</button>
+        <div id="searchResults"></div>
+        <!-- <div id="patientsList"></div> -->
+    
+        <!-- <h2>Patients</h2>
+        <div id="patientsList"></div> -->
+    
+        <h2>Sessions for Patient</h2>
+        <input type="text" id="searchPatientId" placeholder="Enter Patient ID">
+        <button onclick="fetchSessions()">Fetch Sessions</button>
+        <div id="sessionsList"></div>
+    
+        <script src="script.js"></script>
+    </div>
 </body>
 </html>
