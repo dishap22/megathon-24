@@ -81,6 +81,20 @@ function displayPatients(patients) {
     openModal(); // Show the modal
 }
 
+async function fetchSessions() {
+    const patientId = document.getElementById('searchPatientId').value;
+    const response = await fetch(`/sessions/${patientId}`);
+    const sessions = await response.json();
+    const sessionsList = document.getElementById('sessionsList');
+    sessionsList.innerHTML = ''; // Clear previous list
+
+    sessions.forEach(session => {
+        const p = document.createElement('p');
+        p.textContent = `Session ID: ${session.id}, Date: ${session.sessionDate}, Notes: ${session.notes}`;
+        sessionsList.appendChild(p);
+    });
+}
+
 // Modal control functions
 function openModal() {
     document.getElementById('modal').style.display = 'block';
