@@ -17,6 +17,8 @@ if 'User Input' in data.columns:
         highest_sentiment = max(filtered_scores, key=filtered_scores.get)
         compound_score = abs(vader_scores['compound'])
         intensity_on_scale = round(compound_score * 10)
+        if (intensity_on_scale > 10): intensity_on_scale = 10
+        if (intensity_on_scale < 0): intensity_on_scale = 0
         print(f"{user_input:<65} Polarity: {highest_sentiment.capitalize()}, Intensity: {intensity_on_scale}")
 else:
     print("The 'User Input' column is not found in the provided Excel file.")
