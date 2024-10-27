@@ -1,8 +1,8 @@
 import pandas as pd
 import yake
 
-file_path = 'smol.xlsx'
-data = pd.read_excel(file_path)
+file_path = 'smol.csv'  
+data = pd.read_csv(file_path)  
 
 if 'User Input' in data.columns:
     yake_kw_extractor = yake.KeywordExtractor()
