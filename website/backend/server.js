@@ -4,6 +4,7 @@ const path = require('path');
 const db = require('./firebase'); // Import Firestore
 const multer = require('multer'); // Middleware for handling file uploads
 const { exec } = require('child_process'); // To run the Python script
+const fs = require('fs'); // To read files
 const app = express();
 const PORT = 3000;
 
@@ -45,26 +46,79 @@ app.post('/sessions', upload.single('audioFile'), async (req, res) => {
     const { patientId, sessionDate, notes } = req.body;
 
     // Call the Python script to convert audio to text
-    exec(`python3 audio_to_text.py "${req.file.path}"`, (error, stdout, stderr) => {
+    exec(`python3 audio_to_text.py "${req.file.path}"`, async (error, stdout, stderr) => {
         if (error) {
             console.error(`exec error: ${error}`);
             return res.status(500).json({ error: 'Error processing audio' });
         }
 
-        // Get the transcript output from the Python script
-        const transcript = stdout.trim(); // Trim whitespace from output
+        // Read the generated CSV file for transcripts
+        const csvFilePath = 'path_to_generated_csv'; // Update with your generated CSV path
+        fs.readFile(csvFilePath, 'utf-8', (err, data) => {
+            if (err) {
+                console.error(`Error reading CSV: ${err}`);
+                return res.status(500).json({ error: 'Error reading CSV' });
+            }
 
-        // Store session details along with transcript in Firestore
-        db.collection('sessions').add({
-            patientId,
-            sessionDate,
-            notes,
-            transcript
-        }).then((sessionRef) => {
-            res.json({ id: sessionRef.id, patientId, sessionDate, notes, transcript });
-        }).catch((error) => {
-            console.error("Error adding session:", error);
-            res.status(500).json({ error: 'Error saving session' });
+            // Split the data into lines
+            const sentences = data.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+
+            // Prepare to gather polarity results
+            const polarityResults = [];
+
+            // Call the polarity script for each sentence
+            const polarityPromises = sentences.map(sentence => {
+                return new Promise((resolve, reject) => {
+                    exec(`python3 polarity.py "${sentence}"`, (err, stdout) => {
+                        if (err) {
+                            console.error(`Polarity exec error: ${err}`);
+                            return reject(err);
+                        }
+
+                        const results = JSON.parse(stdout); // Assuming polarity.py outputs JSON
+                        polarityResults.push(results);
+                        resolve();
+                    });
+                });
+            });
+
+            Promise.all(polarityPromises)
+                .then(() => {
+                    // Calculate aggregate polarity metrics
+                    const aggregateResults = {
+                        pos: 0,
+                        avg: 0,
+                        neg: 0,
+                        totalSentences: polarityResults.length
+                    };
+
+                    polarityResults.forEach(({ pos, neg, intensity }) => {
+                        aggregateResults.pos += pos;
+                        aggregateResults.neg += neg;
+                        aggregateResults.avg += intensity; // Average intensity
+                    });
+
+                    // Calculate average intensity
+                    aggregateResults.avg /= aggregateResults.totalSentences;
+
+                    // Store session details along with transcript and polarity results in Firestore
+                    db.collection('sessions').add({
+                        patientId,
+                        sessionDate,
+                        notes,
+                        transcript: sentences,
+                        polarity: aggregateResults
+                    }).then((sessionRef) => {
+                        res.json({ id: sessionRef.id, patientId, sessionDate, notes, transcript: sentences, polarity: aggregateResults });
+                    }).catch((error) => {
+                        console.error("Error adding session:", error);
+                        res.status(500).json({ error: 'Error saving session' });
+                    });
+                })
+                .catch(err => {
+                    console.error(`Error processing polarity: ${err}`);
+                    res.status(500).json({ error: 'Error processing polarity' });
+                });
         });
     });
 });
@@ -93,3 +147,4 @@ app.get('/patients/search/:name', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server is running at http://localhost:${PORT}`);
 });
+11
