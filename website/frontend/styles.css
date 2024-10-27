@@ -101,66 +101,6 @@ button:active {
 }
 
 
-/* Modal Styles */
-.modal {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 1000; /* Sit on top */
-    left: 0;
-    top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgba(0, 0, 0, 0.7); /* Black with opacity */
-}
-
-.modal-content {
-    background-color: white; /* White background */
-    margin: 15% auto; /* 15% from the top and centered */
-    padding: 20px; /* Padding inside the modal */
-    border: 1px solid #888; /* Gray border */
-    width: 80%; /* Could be more or less, depending on screen size */
-    max-width: 600px; /* Max width for larger screens */
-    border-radius: 8px; /* Rounded corners */
-}
-
-.close-button {
-    color: #aaa; /* Gray color */
-    float: right; /* Float to the right */
-    font-size: 28px; /* Size of the close button */
-    font-weight: bold; /* Bold text */
-}
-
-.close-button:hover,
-.close-button:focus {
-    color: black; /* Change color on hover */
-    text-decoration: none; /* No underline */
-    cursor: pointer; /* Pointer cursor */
-}
-
-
-/* Table Styles */
-table {
-    width: 100%; /* Full width */
-    border-collapse: collapse; /* Collapse borders */
-    margin-top: 10px; /* Space above the table */
-}
-
-th, td {
-    border: 1px solid #d1c4e9; /* Light pastel purple border */
-    padding: 8px; /* Padding inside cells */
-    text-align: left; /* Align text to the left */
-}
-
-th {
-    background-color: #b679c1; /* Pastel purple for header */
-    color: white; /* White text for header */
-}
-
-tr:nth-child(even) {
-    background-color: #f2f2f2; /* Light gray background for even rows */
-}
-
 .patient-entry {
     margin: 10px 0;
     padding: 10px;

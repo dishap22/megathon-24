@@ -32,31 +32,45 @@ function setDefaultDate() {
 async function fetchPatients() {
     const response = await fetch('/patients');
     const patients = await response.json();
+    displayPatients(patients); // Display all patients
+}
+
+async function fetchPatientsByName() {
+    const name = document.getElementById('searchPatientName').value;
+    const response = await fetch(`/patients/search/${encodeURIComponent(name)}`);
+    const patients = await response.json();
+    displayPatients(patients); // Show search results in the same format
+}
+
+function displayPatients(patients) {
     const patientsList = document.getElementById('searchResults');
     patientsList.innerHTML = ''; // Clear previous entries
 
-    patients.forEach(patient => {
-        const patientEntry = document.createElement('div');
-        patientEntry.className = 'patient-entry';
+    if (patients.length === 0) {
+        patientsList.innerHTML = '<p>No patients found.</p>';
+    } else {
+        patients.forEach(patient => {
+            const patientEntry = document.createElement('div');
+            patientEntry.className = 'patient-entry';
 
-        const patientDetails = document.createElement('p');
-        patientDetails.innerHTML = `
-            <strong>Name:</strong> <span class="patient-value">${patient.name}</span><br>
-            <strong>DOB:</strong> <span class="patient-value">${patient.dateOfBirth}</span><br>
-            <strong>Contact:</strong> <span class="patient-value">${patient.contactInfo}</span>
-        `;
-        
-        const copyButton = document.createElement('button');
-        copyButton.className = 'copy-id-button';
-        copyButton.textContent = 'Copy ID';
-        copyButton.onclick = () => copyToClipboard(patient.id, copyButton); // Pass patient ID and button
+            const patientDetails = document.createElement('p');
+            patientDetails.innerHTML = `
+                <strong>Name:</strong> <span class="patient-value">${patient.name}</span><br>
+                <strong>DOB:</strong> <span class="patient-value">${patient.dateOfBirth}</span><br>
+                <strong>Contact:</strong> <span class="patient-value">${patient.contactInfo}</span>
+            `;
 
-        patientEntry.appendChild(patientDetails);
-        patientEntry.appendChild(copyButton);
-        patientsList.appendChild(patientEntry); // Append the new patient entry to the results list
-    });
+            const copyButton = document.createElement('button');
+            copyButton.className = 'copy-id-button';
+            copyButton.textContent = 'Copy ID';
+            copyButton.onclick = () => copyToClipboard(patient.id, copyButton); // Pass patient ID and button
+
+            patientEntry.appendChild(patientDetails);
+            patientEntry.appendChild(copyButton);
+            patientsList.appendChild(patientEntry); // Append the new patient entry to the results list
+        });
+    }
 }
-
 
 function copyToClipboard(id, button) {
     navigator.clipboard.writeText(id).then(() => {
@@ -76,14 +90,14 @@ function copyToClipboard(id, button) {
     });
 }
 
+// Fetch sessions function (to be implemented)
+async function fetchSessions() {
+    const patientId = document.getElementById('searchPatientId').value;
+    // Add your implementation to fetch sessions for the patient by ID
+}
 
+// Set default date on page load
 
-
-// In fetchPatients, update the copy button onClick to pass the button itself
-const copyButton = document.createElement('button');
-copyButton.className = 'copy-id-button';
-copyButton.textContent = 'Copy ID';
-copyButton.onclick = () => copyToClipboard(patient.id, copyButton); // Pass patient ID and button
 
 
 async function addSession() {
@@ -115,45 +129,6 @@ async function addSession() {
     }
 }
 
-async function fetchPatientsByName() {
-    const name = document.getElementById('searchPatientName').value;
-    const response = await fetch(`/patients/search/${encodeURIComponent(name)}`);
-    const patients = await response.json();
-    displayPatients(patients); // Show results in modal
-}
-
-// Show the modal with patient data
-function displayPatients(patients) {
-    const searchResults = document.getElementById('searchResults');
-    searchResults.innerHTML = ''; // Clear previous search results
-
-    if (patients.length === 0) {
-        searchResults.innerHTML = '<p>No patients found.</p>';
-    } else {
-        const table = document.createElement('table');
-        table.innerHTML = `
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>DOB</th>
-                <th>Contact</th>
-            </tr>`;
-        
-        patients.forEach(patient => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${patient.id}</td>
-                <td>${patient.name}</td>
-                <td>${patient.dateOfBirth}</td>
-                <td>${patient.contactInfo}</td>`;
-            table.appendChild(row);
-        });
-
-        searchResults.appendChild(table);
-    }
-    openModal(); // Show the modal
-}
-
 async function fetchSessions() {
     const patientId = document.getElementById('searchPatientId').value;
     const response = await fetch(`/sessions/${patientId}`);
@@ -168,22 +143,6 @@ async function fetchSessions() {
     });
 }
 
-// Modal control functions
-function openModal() {
-    document.getElementById('modal').style.display = 'block';
-}
-
-function closeModal() {
-    document.getElementById('modal').style.display = 'none';
-}
-
-// Close modal when clicking outside of it
-window.onclick = function(event) {
-    const modal = document.getElementById('modal');
-    if (event.target === modal) {
-        closeModal();
-    }
-}
 
 // Set default date on page load
 window.onload = setDefaultDate;
