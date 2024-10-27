@@ -13,5 +13,10 @@ if 'User Input' in data.columns:
         user_input = row['User Input']
         vader_scores = row['VADER Scores']
         print(f"{user_input:<65} {vader_scores}")
+        filtered_scores = {key: value for key, value in vader_scores.items() if key != 'compound'}
+        highest_sentiment = max(filtered_scores, key=filtered_scores.get)
+        compound_score = abs(vader_scores['compound'])
+        intensity_on_scale = round(compound_score * 10)
+        print(f"{user_input:<65} Polarity: {highest_sentiment.capitalize()}, Intensity: {intensity_on_scale}")
 else:
     print("The 'User Input' column is not found in the provided Excel file.")
