@@ -53,7 +53,7 @@ app.post('/sessions', upload.single('audioFile'), async (req, res) => {
         }
 
         // Read the generated CSV file for transcripts
-        const csvFilePath = 'path_to_generated_csv'; // Update with your generated CSV path
+        const csvFilePath = 'sentences.csv'; // Update with your generated CSV path
         fs.readFile(csvFilePath, 'utf-8', (err, data) => {
             if (err) {
                 console.error(`Error reading CSV: ${err}`);

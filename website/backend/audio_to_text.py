@@ -3,15 +3,16 @@ import librosa
 from transformers import Speech2TextProcessor, Speech2TextForConditionalGeneration, pipeline
 from deepmultilingualpunctuation import PunctuationModel
 import csv
+import sys
 
 
-def get_sentences(session_id):
+def get_sentences():
     # Load the pretrained model and processor
     model = Speech2TextForConditionalGeneration.from_pretrained("facebook/s2t-small-librispeech-asr")
     processor = Speech2TextProcessor.from_pretrained("facebook/s2t-small-librispeech-asr")
 
     # Load your custom audio file
-    audio_file_path = str(session_id) + ".wav"
+    audio_file_path = sys[1]
     speech_array, original_sampling_rate = librosa.load(audio_file_path, sr=None)
 
     # Resample to 16,000 Hz if necessary
@@ -34,7 +35,7 @@ def get_sentences(session_id):
     punctuated_text = punctuation_model.restore_punctuation(transcription)
     sentences = punctuated_text.split(". ")
 
-    filename = str(session_id) + ".csv"
+    filename = "sentences.csv"
     with open(filename, "w", newline="") as file:
         writer = csv.writer(file)
         for sentence in sentences:
