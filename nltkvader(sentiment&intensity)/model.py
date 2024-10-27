@@ -3,8 +3,8 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 analyzer = SentimentIntensityAnalyzer()
 
-file_path = 'smol.xlsx'  
-data = pd.read_excel(file_path)
+file_path = 'smol.csv'  
+data = pd.read_csv(file_path)
 
 if 'User Input' in data.columns:
     data['VADER Scores'] = data['User Input'].apply(lambda x: analyzer.polarity_scores(str(x)))
