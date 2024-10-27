@@ -46,58 +46,57 @@ async function fetchPatientsByName() {
     const name = document.getElementById('searchPatientName').value;
     const response = await fetch(`/patients/search/${encodeURIComponent(name)}`);
     const patients = await response.json();
+    displayPatients(patients); // Show results in modal
+}
+
+// Show the modal with patient data
+function displayPatients(patients) {
     const searchResults = document.getElementById('searchResults');
     searchResults.innerHTML = ''; // Clear previous search results
 
-    patients.forEach(patient => {
-        const p = document.createElement('p');
-        p.textContent = `ID: ${patient.id}, Name: ${patient.name}, DOB: ${patient.dateOfBirth}, Contact: ${patient.contactInfo}`;
-        searchResults.appendChild(p);
-    });
+    if (patients.length === 0) {
+        searchResults.innerHTML = '<p>No patients found.</p>';
+    } else {
+        const table = document.createElement('table');
+        table.innerHTML = `
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>DOB</th>
+                <th>Contact</th>
+            </tr>`;
+        
+        patients.forEach(patient => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${patient.id}</td>
+                <td>${patient.name}</td>
+                <td>${patient.dateOfBirth}</td>
+                <td>${patient.contactInfo}</td>`;
+            table.appendChild(row);
+        });
+
+        searchResults.appendChild(table);
+    }
+    openModal(); // Show the modal
 }
 
-
-async function addSession() {
-    const patientId = document.getElementById('sessionPatientId').value;
-    const sessionDate = document.getElementById('sessionDate').value;
-    const notes = document.getElementById('sessionNotes').value;
-    const audioFile = document.getElementById('audioFile').files[0]; // Get the audio file
-
-    const formData = new FormData();
-    formData.append('patientId', patientId);
-    formData.append('sessionDate', sessionDate);
-    formData.append('notes', notes);
-    formData.append('audioFile', audioFile); // Append audio file
-
-    const response = await fetch('/sessions', {
-        method: 'POST',
-        body: formData
-    });
-
-    const newSession = await response.json();
-    console.log('New Session Recorded:', newSession);
-    
-    // Clear input fields
-    document.getElementById('sessionPatientId').value = '';
-    document.getElementById('sessionDate').value = '';
-    document.getElementById('sessionNotes').value = '';
-    document.getElementById('audioFile').value = ''; // Clear audio file input
+// Modal control functions
+function openModal() {
+    document.getElementById('modal').style.display = 'block';
 }
 
-
-async function fetchSessions() {
-    const patientId = document.getElementById('searchPatientId').value;
-    const response = await fetch(`/sessions/${patientId}`);
-    const sessions = await response.json();
-    const sessionsList = document.getElementById('sessionsList');
-    sessionsList.innerHTML = ''; // Clear previous list
-
-    sessions.forEach(session => {
-        const p = document.createElement('p');
-        p.textContent = `Session ID: ${session.id}, Date: ${session.sessionDate}, Notes: ${session.notes}`;
-        sessionsList.appendChild(p);
-    });
+function closeModal() {
+    document.getElementById('modal').style.display = 'none';
 }
 
+// Close modal when clicking outside of it
+window.onclick = function(event) {
+    const modal = document.getElementById('modal');
+    if (event.target === modal) {
+        closeModal();
+    }
+}
 
+// Set default date on page load
 window.onload = setDefaultDate;
