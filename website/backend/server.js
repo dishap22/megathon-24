@@ -41,78 +41,9 @@ app.get('/patients', async (req, res) => {
     res.json(patients);
 });
 
-// // Route to add a new session for a patient, including audio file upload
-// app.post('/sessions', upload.single('audioFile'), async (req, res) => {
-//     const { patientId, sessionDate, notes } = req.body;
-
-//     // Call the Python script to convert audio to text
-//     console.log('fdgdfhsfdn')
-//     exec(`python3 audio_to_text.py "${req.file.path}"`, async (error, stdout, stderr) => {
-//         if (error) {
-//             console.error(`exec error: ${error}`);
-//             return res.status(500).json({ error: 'Error processing audio' });
-//         }
-//             // Prepare to gather polarity results
-//             const polarityResults = [];
-
-//             // Call the polarity script for each sentence
-//             const polarityPromises = sentences.map(sentence => {
-//                 return new Promise((resolve, reject) => {
-//                     exec(`python3 polarity.py`, (err, stdout) => {
-//                         if (err) {
-//                             console.error(`Polarity exec error: ${err}`);
-//                             return reject(err);
-//                         }
-
-//                         const results = JSON.parse(stdout); // Assuming polarity.py outputs JSON
-//                         polarityResults.push(results);
-//                         resolve();
-//                     });
-//                 });
-//             });
-
-//             Promise.all(polarityPromises)
-//                 .then(() => {
-//                     // Calculate aggregate polarity metrics
-//                     const aggregateResults = {
-//                         pos: 0,
-//                         avg: 0,
-//                         neg: 0,
-//                         totalSentences: polarityResults.length
-//                     };
-
-//                     polarityResults.forEach(({ pos, neg, intensity }) => {
-//                         aggregateResults.pos += pos;
-//                         aggregateResults.neg += neg;
-//                         aggregateResults.avg += intensity; // Average intensity
-//                     });
-
-//                     // Calculate average intensity
-//                     aggregateResults.avg /= aggregateResults.totalSentences;
-
-//                     // Store session details along with transcript and polarity results in Firestore
-//                     db.collection('sessions').add({
-//                         patientId,
-//                         sessionDate,
-//                         notes,
-//                         transcript: sentences,
-//                         polarity: aggregateResults
-//                     }).then((sessionRef) => {
-//                         res.json({ id: sessionRef.id, patientId, sessionDate, notes, transcript: sentences, polarity: aggregateResults });
-//                     }).catch((error) => {
-//                         console.error("Error adding session:", error);
-//                         res.status(500).json({ error: 'Error saving session' });
-//                     });
-//                 })
-//                 .catch(err => {
-//                     console.error(`Error processing polarity: ${err}`);
-//                     res.status(500).json({ error: 'Error processing polarity' });
-//                 });
-//     });
-// });
-
 // Route to add a new session for a patient, including audio file upload
 app.post('/sessions', upload.single('audioFile'), async (req, res) => {
+    console.log('fdgdfhsfdn')
     const { patientId, sessionDate, notes } = req.body;
 
     // Call the Python script to convert audio to text
@@ -121,69 +52,64 @@ app.post('/sessions', upload.single('audioFile'), async (req, res) => {
             console.error(`exec error: ${error}`);
             return res.status(500).json({ error: 'Error processing audio' });
         }
+            // Prepare to gather polarity results
+            const polarityResults = [];
 
-        // Assuming the audio_to_text.py outputs the sentences in a CSV or similar format
-        const sentences = stdout.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+            // Call the polarity script for each sentence
+            const polarityPromises = sentences.map(sentence => {
+                return new Promise((resolve, reject) => {
+                    exec(`python3 polarity.py`, (err, stdout) => {
+                        if (err) {
+                            console.error(`Polarity exec error: ${err}`);
+                            return reject(err);
+                        }
 
-        // Call the polarity script once with all sentences
-        const sentencesString = sentences.join('|'); // Join sentences with '|'
-        exec(`python3 polarity.py "${sentencesString}"`, (err, stdout, stderr) => {
-            if (err) {
-                console.error(`Polarity exec error: ${err}`);
-                return res.status(500).json({ error: `Polarity exec error: ${stderr}` }); // Include stderr for more detail
-            }
-
-            let polarityResults;
-            try {
-                polarityResults = JSON.parse(stdout); // Parse the JSON output from the Python script
-            } catch (parseError) {
-                console.error(`JSON parse error: ${parseError}`);
-                return res.status(500).json({ error: `JSON parse error: ${parseError.message}` }); // Handle parsing error
-            }
-
-            // Calculate aggregate polarity metrics
-            const aggregateResults = {
-                pos: 0,
-                avg: 0,
-                neg: 0,
-                totalSentences: polarityResults.length
-            };
-
-            polarityResults.forEach(({ pos, neg, compound }) => {
-                aggregateResults.pos += pos;
-                aggregateResults.neg += neg;
-                aggregateResults.avg += compound; // Use compound as average intensity
-            });
-
-            // Calculate average intensity if there are sentences
-            if (aggregateResults.totalSentences > 0) {
-                aggregateResults.avg /= aggregateResults.totalSentences;
-            }
-
-            // Store session details along with transcript and polarity results in Firestore
-            db.collection('sessions').add({
-                patientId,
-                sessionDate,
-                notes,
-                transcript: sentences,
-                polarity: aggregateResults
-            }).then((sessionRef) => {
-                res.json({
-                    id: sessionRef.id,
-                    patientId,
-                    sessionDate,
-                    notes,
-                    transcript: sentences,
-                    polarity: aggregateResults
+                        const results = JSON.parse(stdout); // Assuming polarity.py outputs JSON
+                        polarityResults.push(results);
+                        resolve();
+                    });
                 });
-            }).catch((error) => {
-                console.error("Error adding session:", error);
-                res.status(500).json({ error: `Error saving session: ${error.message}` }); // Include error message
             });
-        });
+
+            Promise.all(polarityPromises)
+                .then(() => {
+                    // Calculate aggregate polarity metrics
+                    const aggregateResults = {
+                        pos: 0,
+                        avg: 0,
+                        neg: 0,
+                        totalSentences: polarityResults.length
+                    };
+
+                    polarityResults.forEach(({ pos, neg, intensity }) => {
+                        aggregateResults.pos += pos;
+                        aggregateResults.neg += neg;
+                        aggregateResults.avg += intensity; // Average intensity
+                    });
+
+                    // Calculate average intensity
+                    aggregateResults.avg /= aggregateResults.totalSentences;
+
+                    // Store session details along with transcript and polarity results in Firestore
+                    db.collection('sessions').add({
+                        patientId,
+                        sessionDate,
+                        notes,
+                        transcript: sentences,
+                        polarity: aggregateResults
+                    }).then((sessionRef) => {
+                        res.json({ id: sessionRef.id, patientId, sessionDate, notes, transcript: sentences, polarity: aggregateResults });
+                    }).catch((error) => {
+                        console.error("Error adding session:", error);
+                        res.status(500).json({ error: 'Error saving session' });
+                    });
+                })
+                .catch(err => {
+                    console.error(`Error processing polarity: ${err}`);
+                    res.status(500).json({ error: 'Error processing polarity' });
+                });
     });
 });
-
 
 // Route to get sessions for a specific patient
 app.get('/sessions/:patientId', async (req, res) => {
