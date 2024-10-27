@@ -100,34 +100,117 @@ async function fetchSessions() {
 
 
 
+// async function addSession() {
+//     const patientId = document.getElementById('sessionPatientId').value;
+//     const sessionDate = document.getElementById('sessionDate').value;
+//     const notes = document.getElementById('sessionNotes').value;
+//     const audioFile = document.getElementById('audioFile').files[0];
+
+//     const formData = new FormData();
+//     formData.append('patientId', patientId);
+//     formData.append('sessionDate', sessionDate);
+//     formData.append('notes', notes);
+//     formData.append('audioFile', audioFile);
+
+//     try {
+//         const response = await fetch('/sessions', {
+//             method: 'POST',
+//             body: formData
+//         });
+
+//         if (!response.ok) {
+//             throw new Error(`HTTP error! status: ${response.status}`);
+//         }
+
+//         const newSession = await response.json();
+//         console.log('New Session Recorded:', newSession);
+//     } catch (error) {
+//         console.error('Error recording session:', error);
+//     }
+// }
+
 async function addSession() {
-    const patientId = document.getElementById('sessionPatientId').value;
-    const sessionDate = document.getElementById('sessionDate').value;
-    const notes = document.getElementById('sessionNotes').value;
-    const audioFile = document.getElementById('audioFile').files[0];
-
-    const formData = new FormData();
-    formData.append('patientId', patientId);
-    formData.append('sessionDate', sessionDate);
-    formData.append('notes', notes);
-    formData.append('audioFile', audioFile);
-
+    console.log('fgshhnnh');
+    const submitButton = document.getElementById('submitSession');
+    const statusDiv = document.getElementById('sessionStatus');
+    
     try {
+        // Disable submit button and show loading state
+        submitButton.disabled = true;
+        statusDiv.innerHTML = '<p class="text-yellow-600">Processing session... Please wait.</p>';
+        
+        // Validate inputs
+        const patientId = document.getElementById('sessionPatientId').value;
+        const sessionDate = document.getElementById('sessionDate').value;
+        const notes = document.getElementById('sessionNotes').value;
+        const audioFile = document.getElementById('audioFile').files[0];
+        
+        if (!patientId || !sessionDate || !audioFile) {
+            throw new Error('Please fill in all required fields and upload an audio file.');
+        }
+        
+        // Validate audio file type
+        const validAudioTypes = ['audio/wav', 'audio/mp3', 'audio/mpeg', 'audio/x-m4a'];
+        if (!validAudioTypes.includes(audioFile.type)) {
+            throw new Error('Please upload a valid audio file (WAV, MP3, or M4A format).');
+        }
+        
+        // Create form data
+        const formData = new FormData();
+        formData.append('patientId', patientId);
+        formData.append('sessionDate', sessionDate);
+        formData.append('notes', notes);
+        formData.append('audioFile', audioFile);
+        
+        // Send request with timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 300000); // 5-minute timeout
+        
         const response = await fetch('/sessions', {
             method: 'POST',
-            body: formData
+            body: formData,
+            signal: controller.signal
         });
-
+        
+        clearTimeout(timeoutId);
+        
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to record session');
         }
-
+        
         const newSession = await response.json();
-        console.log('New Session Recorded:', newSession);
+        
+        // Show success message with session details
+        statusDiv.innerHTML = `
+            <div class="text-green-600">
+                <p>Session recorded successfully!</p>
+                <p>Session ID: ${newSession.id}</p>
+                <p>Date: ${newSession.sessionDate}</p>
+                ${newSession.transcript ? `<p>Transcribed ${newSession.transcript.length} sentences</p>` : ''}
+                ${newSession.classification ? `<p>Detected conditions: ${newSession.classification}</p>` : ''}
+            </div>
+        `;
+        
+        // Clear form
+        document.getElementById('sessionPatientId').value = '';
+        document.getElementById('sessionNotes').value = '';
+        document.getElementById('audioFile').value = '';
+        setDefaultDate(); // Reset date to today
+        
+        // Update sessions list if it exists
+        if (newSession.patientId) {
+            await fetchSessions(newSession.patientId);
+        }
+        
     } catch (error) {
         console.error('Error recording session:', error);
+        statusDiv.innerHTML = `<p class="text-red-600">Error: ${error.message}</p>`;
+    } finally {
+        submitButton.disabled = false;
     }
 }
+
 
 async function fetchSessions() {
     const patientId = document.getElementById('searchPatientId').value;
