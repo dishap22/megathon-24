@@ -5,6 +5,7 @@ from deepmultilingualpunctuation import PunctuationModel
 import csv
 import sys
 
+print("heheheheheheheheheheh")
 
 # def get_sentences():
 # Load the pretrained model and processor
@@ -35,7 +36,7 @@ punctuation_model = PunctuationModel()
 punctuated_text = punctuation_model.restore_punctuation(transcription)
 sentences = punctuated_text.split(". ")
 
-filename = "sentences.csv"
+filename = "smol.csv"
 with open(filename, "w", newline="") as file:
     writer = csv.writer(file)
     for sentence in sentences:
