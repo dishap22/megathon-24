@@ -33,13 +33,86 @@ async function fetchPatients() {
     const response = await fetch('/patients');
     const patients = await response.json();
     const patientsList = document.getElementById('searchResults');
-    patientsList.innerHTML = ''; // Clear previous list
+    patientsList.innerHTML = ''; // Clear previous entries
 
     patients.forEach(patient => {
-        const p = document.createElement('p');
-        p.textContent = `ID: ${patient.id}, Name: ${patient.name}, DOB: ${patient.dateOfBirth}, Contact: ${patient.contactInfo}`;
-        patientsList.appendChild(p);
+        const patientEntry = document.createElement('div');
+        patientEntry.className = 'patient-entry';
+
+        const patientDetails = document.createElement('p');
+        patientDetails.innerHTML = `
+            <strong>Name:</strong> <span class="patient-value">${patient.name}</span><br>
+            <strong>DOB:</strong> <span class="patient-value">${patient.dateOfBirth}</span><br>
+            <strong>Contact:</strong> <span class="patient-value">${patient.contactInfo}</span>
+        `;
+        
+        const copyButton = document.createElement('button');
+        copyButton.className = 'copy-id-button';
+        copyButton.textContent = 'Copy ID';
+        copyButton.onclick = () => copyToClipboard(patient.id, copyButton); // Pass patient ID and button
+
+        patientEntry.appendChild(patientDetails);
+        patientEntry.appendChild(copyButton);
+        patientsList.appendChild(patientEntry); // Append the new patient entry to the results list
     });
+}
+
+
+function copyToClipboard(id, button) {
+    navigator.clipboard.writeText(id).then(() => {
+        // Change button width
+        button.style.width = '360px'; // Expand width
+        // Change button text
+        const originalText = button.textContent;
+        button.innerHTML = `Copied Patient ID: <strong>${id}</strong> to Clipboard!`; // Bold for ID
+
+        // Revert text and width after 5 seconds
+        setTimeout(() => {
+            button.innerHTML = originalText; // Restore original button text
+            button.style.width = '120px'; // Revert width
+        }, 5000); // 5000 milliseconds = 5 seconds
+    }).catch(err => {
+        console.error('Error copying ID: ', err);
+    });
+}
+
+
+
+
+// In fetchPatients, update the copy button onClick to pass the button itself
+const copyButton = document.createElement('button');
+copyButton.className = 'copy-id-button';
+copyButton.textContent = 'Copy ID';
+copyButton.onclick = () => copyToClipboard(patient.id, copyButton); // Pass patient ID and button
+
+
+async function addSession() {
+    const patientId = document.getElementById('sessionPatientId').value;
+    const sessionDate = document.getElementById('sessionDate').value;
+    const notes = document.getElementById('sessionNotes').value;
+    const audioFile = document.getElementById('audioFile').files[0];
+
+    const formData = new FormData();
+    formData.append('patientId', patientId);
+    formData.append('sessionDate', sessionDate);
+    formData.append('notes', notes);
+    formData.append('audioFile', audioFile);
+
+    try {
+        const response = await fetch('/sessions', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const newSession = await response.json();
+        console.log('New Session Recorded:', newSession);
+    } catch (error) {
+        console.error('Error recording session:', error);
+    }
 }
 
 async function fetchPatientsByName() {
